@@ -34,7 +34,7 @@ class action_plugin_tablewidth extends DokuWiki_Action_Plugin {
                     $start = $data[0][1] + strlen($data[0][0]);
                 }
 
-                $event->data[1] = $html . substr($event->data[1], $start);;
+                $event->data[1] = $html . substr($event->data[1], $start);
             }
         }
     }

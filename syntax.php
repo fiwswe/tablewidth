@@ -37,7 +37,8 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
                 return false;
             }
 
-            return array($match[1]);
+            // Sanitize input to avoid injection of HTML tags
+            return array(str_replace(array('<', '>'), '', $match[1]));
         }
 
         return false;
