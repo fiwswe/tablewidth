@@ -33,12 +33,15 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
 
     public function handle($match, $state, $pos, Doku_Handler $handler) {
         if ($state == DOKU_LEXER_SPECIAL) {
-            if (preg_match('/\|<\s*(.+?)\s*>\|/', $match, $match) != 1) {
+            if (preg_match('/\|<(\s*)(.+?)(\s*)>\|/', $match, $match) != 1) {
                 return false;
             }
 
-            // Sanitize input to avoid injection of HTML tags
-            return array(str_replace(array('<', '>'), '', $match[1]));
+            // Sanitize the width spec to avoid injection of HTML tags
+            $widthSpec = str_replace(array('<', '>'), '', $match[2]);
+            $tableAlign = $this->getTableAlign($match[1], $match[3]);
+
+            return array($tableAlign . $widthSpec);
         }
 
         return false;
@@ -52,5 +55,23 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
         }
 
         return false;
+    }
+
+    private function getTableAlign($paddingLeft, $paddingRight) {
+        if (strlen($paddingLeft) > 1) {
+            if (strlen($paddingRight) > 1) {
+                return '>< ';
+            }
+            else {
+                return '> ';
+            }
+        }
+        else {
+            if (strlen($paddingRight) > 1) {
+                return '< ';
+            }
+        }
+
+        return '';
     }
 }

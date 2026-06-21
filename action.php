@@ -46,10 +46,11 @@ class action_plugin_tablewidth extends DokuWiki_Action_Plugin {
         preg_match('/<!-- table-width ([^\n]+?) -->/', $data[1][0], $match);
 
         $width = preg_split('/\s+/', $match[1]);
+        $tableAlign = preg_match('/[<>]+/', $width[0]) == 1 ? array_shift($width) : '-';
         $tableWidth = array_shift($width);
 
-        if ($tableWidth != '-') {
-            $table = $this->styleTable($data[2][0], $tableWidth);
+        if ($tableWidth != '-' || $tableAlign != '-') {
+            $table = $this->styleTable($data[2][0], $tableWidth, $tableAlign);
         }
         else {
             $table = $data[2][0];
@@ -59,24 +60,54 @@ class action_plugin_tablewidth extends DokuWiki_Action_Plugin {
     }
 
     /**
-     * Add width style to the table
+     * Add width and align styles to the table
      */
-    private function styleTable($html, $width) {
+    private function styleTable($html, $width, $align) {
         preg_match('/^([^\n]*<table)(.*?)(>)$/', $html, $match);
 
         $entry = $match[1];
         $attributes = $match[2];
         $exit = $match[3];
-        $widthStyle = 'min-width: 0px; width: ' . $width . ';';
+
+        $widthStyle = $this->getTableWidthStyle($width);
+        $alignStyle = $this->getTableAlignStyle($align);
+        $tableStyle = implode(' ', array_filter([$widthStyle, $alignStyle]));
 
         if (preg_match('/(.*?style\s*=\s*(["\']).*?)(\2.*)/', $attributes, $match) == 1) {
-            $attributes = $match[1] . '; ' . $widthStyle . $match[3];
+            $attributes = $match[1] . '; ' . $tableStyle . $match[3];
         }
         else {
-            $attributes .= ' style="' . $widthStyle . '"';
+            $attributes .= ' style="' . $tableStyle . '"';
         }
 
         return $entry . $attributes . $exit;
+    }
+
+    /**
+     * Return table width style
+     */
+    private function getTableWidthStyle($width) {
+        if ($width != '-') {
+            return 'min-width: 0; width: ' . $width . ';';
+        }
+
+        return '';
+    }
+
+    /**
+     * Return table align style
+     */
+    private function getTableAlignStyle($align) {
+        switch ($align) {
+            case '><':
+                return 'margin-left: auto; margin-right: auto;';
+            case '>':
+                return 'margin-left: auto; margin-right: 0;';
+            case '<':
+                return 'margin-left: 0; margin-right: auto;';
+        }
+
+        return '';
     }
 
     /**
