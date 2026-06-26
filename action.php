@@ -116,13 +116,17 @@ class action_plugin_tablewidth extends DokuWiki_Action_Plugin {
     private function renderColumns($width) {
         $html = DOKU_LF;
 
-        foreach ($width as $w) {
-            if ($w != '-') {
-                $html .= '<col style="width: ' . $w . '" />';
+        if (!empty($width)) {
+            $html .= '<colgroup>';
+            foreach ($width as $w) {
+                if ($w != '-') {
+                    $html .= '<col style="width: ' . $w . '" />';
+                }
+                else {
+                    $html .= '<col />';
+                }
             }
-            else {
-                $html .= '<col />';
-            }
+            $html .= '</colgroup>';
         }
 
         return $html;
