@@ -37,8 +37,8 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
                 return false;
             }
 
-            // Sanitize the width spec to avoid injection of HTML tags
-            $widthSpec = str_replace(array('<', '>'), '', $match[2]);
+            // Sanitize the width spec to avoid injection of HTML tags and extra CSS declarations
+            $widthSpec = str_replace(array('<', '>', ';', '(', ')'), '', $match[2]);
             $tableAlign = $this->getTableAlign($match[1], $match[3]);
 
             return array($tableAlign . $widthSpec);
