@@ -38,13 +38,27 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
             }
 
             // Sanitize the width spec to avoid injection of HTML tags and extra CSS declarations
-            $widthSpec = str_replace(array('<', '>', ';', '(', ')'), '', $match[2]);
+            // and coalesce white space runs to single spaces
+            $wspec = explode(' ', preg_replace('/\s+/u', ' ', $match[2]));
+            $widthSpec = implode(' ', array_map(fn($w): string => $this->cleanCSSwidth($w), $wspec));
             $tableAlign = $this->getTableAlign($match[1], $match[3]);
 
             return array($tableAlign . $widthSpec);
         }
 
         return false;
+    }
+
+    /**
+     * Return the cleaned CSS width value
+     */
+    private function cleanCSSwidth($width): string {
+        // Do we need to remove < and > characters? Probably not because
+        // in the context of a CSS width property value, they don't make sense.
+        // However we need to prevent breaking out of the property value. So
+        // prevent extra CSS properties (seperated by ;) and prevent ending the
+        // style attribute value using a ".
+        return trim(explode(';', explode('"', $width)[0])[0]);
     }
 
     public function render($mode, Doku_Renderer $renderer, $data) {
